@@ -1,5 +1,8 @@
+addCommandAlias("fmt", "all scalafmtSbt scalafmtAll")
+addCommandAlias("fmtCheck", "all scalafmtSbtCheck scalafmtCheckAll")
+
 lazy val scala212  = "2.12.11"
-lazy val scala213  = "2.13.3"
+lazy val scala213  = "2.13.2"
 lazy val mainScala = scala213
 lazy val allScala  = Seq(scala212, mainScala)
 
