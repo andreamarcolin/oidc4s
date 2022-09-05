@@ -2,35 +2,35 @@ name: ci
 
 on:
   pull_request:
-    branches: ['*']
-  push:
-    branches: ['master']
+    branches:
+      - master
 
 jobs:
   build:
     name: Build
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        scala: [2.13.2, 2.12.11]
-        java: [adopt@1.11]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout project
         uses: actions/checkout@v2
-      - name: Setup Java and Scala
-        uses: olafurpg/setup-scala@v5
+      - name: Install Java
+        uses: actions/setup-java@v3
         with:
-          java-version: ${{ matrix.java }}
-      - name: Cache sbt
-        uses: actions/cache@v2
+          distribution: temurin
+          java-version: 17
+          cache: sbt
+      - name: Compile & Test
+        run: sbt +test
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v2
+      - name: Install Java
+        uses: actions/setup-java@v3
         with:
-          path: |
-            ~/.cache/coursier/v1
-            ~/.ivy2/cache
-            ~/.sbt
-          key: sbt-${{ hashFiles('**/build.sbt') }}-${{ hashFiles('project/Build.scala') }}
-      - name: Compile
-        run: sbt ++${{ matrix.scala }} fmtCheck compile
-      - name: Test
-        run: sbt ++${{ matrix.scala }} test
+          distribution: temurin
+          java-version: 17
+          cache: sbt
+      - name: Check with Scalafmt/Scalafix
+        run: sbt +fmtCheck
