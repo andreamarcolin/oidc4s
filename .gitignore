@@ -23,7 +23,11 @@ project/plugins/project/
 *.class
 *.log
 
-### Metals / Bloop ###
+### Metals / Bloop / BSP ###
 .bloop/
 .metals/
 project/metals.sbt
+.bsp/
+
+### Generic ###
+*.DS_Store
