@@ -1,5 +1,5 @@
-addCommandAlias("fmt", "all scalafmtSbt scalafmtAll; all scalafixAll")
-addCommandAlias("fmtCheck", "all scalafmtSbtCheck scalafmtCheckAll; all scalafixAll --check")
+addCommandAlias("fmt", "all scalafmtSbt scalafmtAll; all scalafixAll; all headerCreate")
+addCommandAlias("fmtCheck", "all scalafmtSbtCheck scalafmtCheckAll; all scalafixAll --check; all headerCheck")
 
 val catsV       = "2.8.0"
 val catsEffectV = "3.3.14"
@@ -51,6 +51,7 @@ lazy val allScala  = Seq(scala213, scala3)
 lazy val common = List(
   scalaVersion       := mainScala,
   crossScalaVersions := allScala,
+  organizationName   := "Andrea Marcolin",
   startYear          := Some(2022),
   headerLicense      := Some(HeaderLicense.ALv2("2022", "Andrea Marcolin")),
   tpolecatScalacOptions ~= {
@@ -69,6 +70,7 @@ lazy val root = project
     publishArtifact    := false,
     publish / skip     := true
   )
+  .disablePlugins(HeaderPlugin) // see https://github.com/sbt/sbt-header/issues/153
 
 lazy val core = project
   .in(file("modules/core"))

@@ -33,4 +33,4 @@ jobs:
           java-version: 17
           cache: sbt
       - name: Check with Scalafmt/Scalafix
-        run: sbt +fmtCheck
+        run: sbt fmtCheck
