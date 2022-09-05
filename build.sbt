@@ -8,6 +8,7 @@ val http4sV     = "0.23.15"
 val sttpV       = "3.7.6"
 val jwtV        = "9.1.1"
 val jwkV        = "1.2.24"
+val weaverV     = "0.7.15"
 
 val cats         = "org.typelevel"                 %% "cats-core"     % catsV
 val catsEffect   = "org.typelevel"                 %% "cats-effect"   % catsEffectV
@@ -21,6 +22,7 @@ val sttp         = "com.softwaremill.sttp.client3" %% "core"          % sttpV
 val sttpCirce    = "com.softwaremill.sttp.client3" %% "circe"         % sttpV
 val jwtCirce     = "com.github.jwt-scala"          %% "jwt-circe"     % jwtV
 val jwk          = "com.chatwork"                  %% "scala-jwk"     % jwkV
+val weaver       = "com.disneystreaming"           %% "weaver-cats"   % weaverV
 
 inThisBuild(
   List(
@@ -56,7 +58,8 @@ lazy val common = List(
   headerLicense      := Some(HeaderLicense.ALv2("2022", "Andrea Marcolin")),
   tpolecatScalacOptions ~= {
     _.filterNot(f => f == ScalacOptions.warnUnusedLocals || f == ScalacOptions.warnUnusedParams)
-  }
+  },
+  testFrameworks += new TestFramework("weaver.framework.CatsEffect")
 )
 
 lazy val root = project
@@ -85,8 +88,8 @@ lazy val core = project
       sttp,
       sttpCirce,
       jwtCirce,
-      jwk
-      // compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+      jwk,
+      weaver % Test
     )
   )
 
@@ -100,7 +103,7 @@ lazy val http4s = project
       http4sCore,
       http4sDsl,
       http4sServer,
-      http4sCirce
-      // compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
+      http4sCirce,
+      weaver % Test
     )
   )
