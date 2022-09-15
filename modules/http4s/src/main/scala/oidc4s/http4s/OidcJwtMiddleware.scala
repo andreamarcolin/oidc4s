@@ -27,13 +27,13 @@ import org.http4s.{AuthScheme, AuthedRoutes, Challenge, EntityEncoder, Request}
 import pdi.jwt.JwtClaim
 import sttp.model.Uri
 
-import oidc4s.Error.AccessTokenNotFound
+import oidc4s.Error.{AccessTokenNotFound, InvalidAccessToken}
 import oidc4s.{Error, OidcJwtVerifier}
 
 object OidcJwtMiddleware {
 
   def apply[F[_]: MonadThrow, E, U](
-      oidcAuthorizer: OidcJwtVerifier[F],
+      oidcJwtVerifier: OidcJwtVerifier[F],
       issuer: Uri,
       claimExtractor: JwtClaim => Either[Throwable, U],
       errorBody: Error => E
@@ -50,7 +50,7 @@ object OidcJwtMiddleware {
             case Authorization(Token(AuthScheme.Bearer, token)) => token
           }
           .fold(AccessTokenNotFound.asLeft[U].leftWiden[Error].pure[F]) { token =>
-            oidcAuthorizer.verifyAndExtract[U](token, claimExtractor)
+            oidcJwtVerifier.verifyAndExtract[U](token, claimExtractor).map(_.leftMap(_ => InvalidAccessToken))
           }
       }
 
