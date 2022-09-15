@@ -9,20 +9,25 @@ val sttpV       = "3.7.6"
 val jwtV        = "9.1.1"
 val jwkV        = "1.2.24"
 val weaverV     = "0.7.15"
+val slf4jV      = "1.7.33"
 
-val cats         = "org.typelevel"                 %% "cats-core"     % catsV
-val catsEffect   = "org.typelevel"                 %% "cats-effect"   % catsEffectV
-val circeCore    = "io.circe"                      %% "circe-core"    % circeV
-val circeGeneric = "io.circe"                      %% "circe-generic" % circeV
-val http4sCore   = "org.http4s"                    %% "http4s-core"   % http4sV
-val http4sDsl    = "org.http4s"                    %% "http4s-dsl"    % http4sV
-val http4sServer = "org.http4s"                    %% "http4s-server" % http4sV
-val http4sCirce  = "org.http4s"                    %% "http4s-circe"  % http4sV
-val sttp         = "com.softwaremill.sttp.client3" %% "core"          % sttpV
-val sttpCirce    = "com.softwaremill.sttp.client3" %% "circe"         % sttpV
-val jwtCirce     = "com.github.jwt-scala"          %% "jwt-circe"     % jwtV
-val jwk          = "com.chatwork"                  %% "scala-jwk"     % jwkV
-val weaver       = "com.disneystreaming"           %% "weaver-cats"   % weaverV
+val cats         = "org.typelevel"                 %% "cats-core"           % catsV
+val catsEffect   = "org.typelevel"                 %% "cats-effect"         % catsEffectV
+val circeCore    = "io.circe"                      %% "circe-core"          % circeV
+val circeGeneric = "io.circe"                      %% "circe-generic"       % circeV
+val circeParser  = "io.circe"                      %% "circe-parser"        % circeV
+val http4sCore   = "org.http4s"                    %% "http4s-core"         % http4sV
+val http4sDsl    = "org.http4s"                    %% "http4s-dsl"          % http4sV
+val http4sServer = "org.http4s"                    %% "http4s-server"       % http4sV
+val http4sClient = "org.http4s"                    %% "http4s-ember-client" % http4sV
+val http4sCirce  = "org.http4s"                    %% "http4s-circe"        % http4sV
+val sttp         = "com.softwaremill.sttp.client3" %% "core"                % sttpV
+val sttpHttp4s   = "com.softwaremill.sttp.client3" %% "http4s-backend"      % sttpV
+val sttpCirce    = "com.softwaremill.sttp.client3" %% "circe"               % sttpV
+val jwtCirce     = "com.github.jwt-scala"          %% "jwt-circe"           % jwtV
+val jwk          = "com.chatwork"                  %% "scala-jwk"           % jwkV
+val weaver       = "com.disneystreaming"           %% "weaver-cats"         % weaverV
+val sl4fjNop     = "org.slf4j"                      % "slf4j-nop"           % slf4jV
 
 inThisBuild(
   List(
@@ -77,8 +82,10 @@ lazy val root = project
 
 lazy val core = project
   .in(file("modules/core"))
+  .configs(IntegrationTest extend Test)
   .settings(
     common,
+    Defaults.itSettings,
     name := "oidc4s-core",
     libraryDependencies ++= List(
       cats,
@@ -89,21 +96,31 @@ lazy val core = project
       sttpCirce,
       jwtCirce,
       jwk,
-      weaver % Test
+      weaver       % Test,
+      sttpHttp4s   % Test,
+      http4sClient % Test,
+      circeParser  % Test,
+      sl4fjNop     % Test
     )
   )
 
 lazy val http4s = project
   .in(file("modules/http4s"))
   .dependsOn(core)
+  .configs(IntegrationTest extend Test)
   .settings(
     common,
+    Defaults.itSettings,
     name := "oidc4s-http4s",
     libraryDependencies ++= List(
       http4sCore,
       http4sDsl,
       http4sServer,
       http4sCirce,
-      weaver % Test
+      weaver       % Test,
+      sttpHttp4s   % Test,
+      http4sClient % Test,
+      circeParser  % Test,
+      sl4fjNop     % Test
     )
   )
