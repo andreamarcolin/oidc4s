@@ -41,7 +41,7 @@ trait OidcJwtVerifier[F[_]] {
 
 object OidcJwtVerifier {
 
-  def apply[F[_]: Monad](issuer: Uri, jwksCache: Ref[F, JWKSet]): OidcJwtVerifier[F] =
+  private def apply[F[_]: Monad](issuer: Uri, jwksCache: Ref[F, JWKSet]): OidcJwtVerifier[F] =
     new OidcJwtVerifier[F] {
 
       override def verifyAndExtract[C](jwt: String, extractor: JwtClaim => Either[Throwable, C]): F[Either[Error, C]] =
@@ -76,7 +76,7 @@ object OidcJwtVerifier {
 
     }
 
-  def create[F[_]: Temporal: Concurrent](
+  def create[F[_]: Concurrent: Temporal](
       httpClient: SttpBackend[F, Any],
       issuerUri: Uri,
       fallbackJWKRefreshInterval: FiniteDuration = 1.minute
@@ -87,7 +87,7 @@ object OidcJwtVerifier {
 
     val getOpenIDConfiguration: F[OpenIDConfiguration] =
       basicRequest
-        .get(issuerUri.withPath(".well-known", "openid-configuration"))
+        .get(issuerUri.addPath(".well-known", "openid-configuration"))
         .response(asJson[OpenIDConfiguration])
         .send(httpClient)
         .map(_.body)
