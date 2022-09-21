@@ -23,7 +23,7 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration, SECONDS}
 import cats.Monad
 import cats.data.EitherT
 import cats.effect.syntax.spawn._
-import cats.effect.{Concurrent, Ref, Resource, Temporal}
+import cats.effect.{Ref, Resource, Temporal}
 import cats.syntax.all._
 import com.chatwork.scala.jwk.{AssymetricJWK, JWK, JWKSet, KeyId}
 import io.circe.Decoder
@@ -76,7 +76,7 @@ object OidcJwtVerifier {
 
     }
 
-  def create[F[_]: Concurrent: Temporal](
+  def create[F[_]: Temporal](
       httpClient: SttpBackend[F, Any],
       issuerUri: Uri,
       fallbackJWKRefreshInterval: FiniteDuration = 1.minute
