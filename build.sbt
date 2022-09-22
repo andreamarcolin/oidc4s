@@ -3,13 +3,13 @@ addCommandAlias("fmtCheck", "all scalafmtSbtCheck scalafmtCheckAll; all scalafix
 
 val catsV       = "2.8.0"
 val catsEffectV = "3.3.14"
-val circeV      = "0.14.2"
-val http4sV     = "0.23.15"
+val circeV      = "0.14.3"
+val http4sV     = "0.23.16"
 val sttpV       = "3.8.0"
 val jwtV        = "9.1.1"
 val jwkV        = "1.2.24"
-val weaverV     = "0.7.15"
-val slf4jV      = "1.7.33"
+val weaverV     = "0.8.0"
+val slf4jV      = "1.7.36"
 
 val cats         = "org.typelevel"                 %% "cats-core"           % catsV
 val catsEffect   = "org.typelevel"                 %% "cats-effect"         % catsEffectV
