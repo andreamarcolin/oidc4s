@@ -52,7 +52,7 @@ inThisBuild(
   )
 )
 
-val scala213       = "2.13.8"
+val scala213       = "2.13.10"
 val scala3         = "3.2.0"
 lazy val mainScala = scala213
 lazy val allScala  = Seq(scala213, scala3)
