@@ -5,11 +5,11 @@ val catsV       = "2.8.0"
 val catsEffectV = "3.3.14"
 val circeV      = "0.14.3"
 val http4sV     = "0.23.16"
-val sttpV       = "3.8.0"
+val sttpV       = "3.8.3"
 val jwtV        = "9.1.1"
 val jwkV        = "1.2.24"
 val weaverV     = "0.8.0"
-val slf4jV      = "1.7.36"
+val slf4jV      = "2.0.3"
 
 val cats         = "org.typelevel"                 %% "cats-core"           % catsV
 val catsEffect   = "org.typelevel"                 %% "cats-effect"         % catsEffectV
@@ -52,7 +52,7 @@ inThisBuild(
   )
 )
 
-val scala213       = "2.13.8"
+val scala213       = "2.13.10"
 val scala3         = "3.2.0"
 lazy val mainScala = scala213
 lazy val allScala  = Seq(scala213, scala3)
