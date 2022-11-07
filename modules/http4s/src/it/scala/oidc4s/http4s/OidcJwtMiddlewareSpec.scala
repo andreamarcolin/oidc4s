@@ -10,6 +10,8 @@ import org.http4s.{Uri => _, _}
 import org.http4s.dsl.io._
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.headers.{`WWW-Authenticate`, Authorization}
+import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.noop.NoOpFactory
 import pdi.jwt.JwtClaim
 import sttp.client3._
 import sttp.client3.circe.asJson
@@ -21,6 +23,8 @@ object OidcJwtMiddlewareSpec extends IOSuite {
   override type Res = (SttpBackend[IO, Any], OidcJwtVerifier[IO])
 
   val issuerUri: Uri = uri"http://localhost:8080/realms/test"
+
+  implicit val logging: LoggerFactory[IO] = NoOpFactory[IO]
 
   override def sharedResource: Resource[IO, (SttpBackend[IO, Any], OidcJwtVerifier[IO])] =
     EmberClientBuilder

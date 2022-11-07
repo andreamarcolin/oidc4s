@@ -28,6 +28,7 @@ import cats.syntax.all._
 import com.chatwork.scala.jwk.{AssymetricJWK, JWK, JWKSet, KeyId}
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
+import org.typelevel.log4cats.{Logger, LoggerFactory}
 import pdi.jwt.{JwtCirce, JwtClaim, JwtHeader, JwtOptions}
 import sttp.client3._
 import sttp.client3.circe._
@@ -36,7 +37,7 @@ import sttp.model.{HeaderNames, Uri}
 import oidc4s.Error._
 
 trait OidcJwtVerifier[F[_]] {
-  def verifyAndExtract[C](jwt: String, claimExtractor: JwtClaim => Either[Throwable, C]): F[Either[Error, C]]
+  def verifyAndExtract(jwt: String): F[Either[Error, JwtClaim]]
 }
 
 object OidcJwtVerifier {
@@ -44,7 +45,7 @@ object OidcJwtVerifier {
   private def apply[F[_]: Monad](issuer: Uri, jwksCache: Ref[F, JWKSet]): OidcJwtVerifier[F] =
     new OidcJwtVerifier[F] {
 
-      override def verifyAndExtract[C](jwt: String, extractor: JwtClaim => Either[Throwable, C]): F[Either[Error, C]] =
+      override def verifyAndExtract(jwt: String): F[Either[Error, JwtClaim]] =
         (for {
           jwtHeader <- EitherT.fromEither[F](decodeAndValidateJwtHeader(jwt))
           keyId     <- EitherT.fromOption[F](jwtHeader.keyId.map(KeyId(_)), InvalidAccessToken)
@@ -52,8 +53,7 @@ object OidcJwtVerifier {
           jwk       <- EitherT.fromOption[F](jwks.keyByKeyId(keyId), InvalidAccessToken)
           publicKey <- EitherT.fromEither[F](getPublicKeyFromJwk(jwk))
           claims    <- EitherT.fromEither[F](decodeAndValidateJwt(jwt, publicKey, issuer))
-          userRepr  <- EitherT.fromEither[F](extractor(claims).leftMap[Error](InvalidJwtClaims.apply))
-        } yield userRepr).value
+        } yield claims).value
 
       private def decodeAndValidateJwtHeader(jwt: String): Either[Error, JwtHeader] =
         for {
@@ -76,7 +76,7 @@ object OidcJwtVerifier {
 
     }
 
-  def create[F[_]: Temporal](
+  def create[F[_]: Temporal: LoggerFactory](
       httpClient: SttpBackend[F, Any],
       issuerUri: Uri,
       fallbackJWKRefreshInterval: FiniteDuration = 1.minute
@@ -114,21 +114,23 @@ object OidcJwtVerifier {
     val refreshInterval: Option[FiniteDuration] => FiniteDuration =
       _.getOrElse(fallbackJWKRefreshInterval)
 
-    val periodicallyRefreshCache: (Uri, Option[FiniteDuration], Ref[F, JWKSet]) => F[Unit] =
-      (jwksUri, jwkSetMaxAge, jwkSetCache) =>
+    val periodicallyRefreshCache: (Uri, Option[FiniteDuration], Ref[F, JWKSet], Logger[F]) => F[Unit] =
+      (jwksUri, jwkSetMaxAge, jwkSetCache, logger) =>
         Monad[F].iterateForeverM(refreshInterval(jwkSetMaxAge)) { initialSleep =>
           for {
             _         <- Temporal[F].sleep(initialSleep)
             newJWKSet <- getJWKSet(jwksUri)
             _         <- jwkSetCache.set(newJWKSet._1)
+            _         <- logger.info("JWK cache refreshed")
           } yield refreshInterval(newJWKSet._2)
         }
 
     for {
+      logger     <- Resource.eval(LoggerFactory[F].create)
       openidConf <- Resource.eval(getOpenIDConfiguration)
       jwks       <- Resource.eval(getJWKSet(openidConf.jwks_uri))
       jwksCache  <- Resource.eval(Ref.of[F, JWKSet](jwks._1))
-      _          <- periodicallyRefreshCache(openidConf.jwks_uri, jwks._2, jwksCache).background
+      _          <- periodicallyRefreshCache(openidConf.jwks_uri, jwks._2, jwksCache, logger).background
     } yield OidcJwtVerifier(openidConf.issuer, jwksCache)
   }
 

@@ -32,8 +32,4 @@ object Error {
     override def getMessage: String = s"Unsupported JWT Signature algorithm ($message)"
   }
 
-  final case class InvalidJwtClaims(cause: Throwable) extends Error {
-    override def getMessage: String = s"Invalid JWT claims (${cause.getMessage})"
-  }
-
 }
