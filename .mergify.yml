@@ -1,0 +1,17 @@
+queue_rules:
+  - name: default
+    conditions:
+      - check-success=Build
+      - check-success=Lint
+
+pull_request_rules:
+  - name: merge using the merge queue
+    conditions:
+      - base=master
+      - author=scala-steward
+      - check-success=Build
+      - check-success=Lint
+    actions:
+      queue:
+        name: default
+        method: squash
