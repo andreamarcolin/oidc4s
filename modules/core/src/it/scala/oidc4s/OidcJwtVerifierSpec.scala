@@ -4,8 +4,10 @@ import cats.effect.{IO, Resource}
 import cats.syntax.all._
 import io.circe.parser.parse
 import io.circe.Json
-import oidc4s.Error.{InvalidAccessToken, InvalidJwtClaims}
+import oidc4s.Error._
 import org.http4s.ember.client.EmberClientBuilder
+import org.typelevel.log4cats.noop.NoOpFactory
+import org.typelevel.log4cats.LoggerFactory
 import pdi.jwt.JwtClaim
 import sttp.client3._
 import sttp.client3.circe.asJson
@@ -19,6 +21,8 @@ object OidcJwtVerifierSpec extends IOSuite {
 
   override def sharedResource: Resource[IO, SttpBackend[IO, Any]] =
     EmberClientBuilder.default[IO].build.map(Http4sBackend.usingClient(_))
+
+  implicit val logging: LoggerFactory[IO] = NoOpFactory[IO]
 
   val issuerUri: Uri = uri"http://localhost:8080/realms/test"
 
@@ -66,48 +70,21 @@ object OidcJwtVerifierSpec extends IOSuite {
   test("a valid token gets verified") { client =>
     for {
       token <- getToken(client)
-      res   <- OidcJwtVerifier.create(client, issuerUri).use(_.verifyAndExtract(token, _ => Right(())))
+      res   <- OidcJwtVerifier.create(client, issuerUri).use(_.verifyAndExtract(token))
     } yield expect(res.isRight)
   }
 
   test("claims get extracted successfully") { client =>
     for {
-      token    <- getToken(client)
-      extractor = (c: JwtClaim) =>
-                    parse(c.content).flatMap(j =>
-                      (
-                        j.hcursor.get[String]("http://localhost:8080/org_id"),
-                        j.hcursor.get[String]("http://localhost:8080/user_id")
-                      ).tupled
-                    )
-      res      <- OidcJwtVerifier.create(client, issuerUri).use(_.verifyAndExtract(token, extractor))
+      token <- getToken(client)
+      res   <- OidcJwtVerifier.create(client, issuerUri).use(_.verifyAndExtract(token))
     } yield expect.same(Right("org1" -> "user1"), res)
   }
 
   test("an expired token fails verification") { client =>
     OidcJwtVerifier
       .create(client, issuerUri)
-      .use(_.verifyAndExtract(expiredToken, _ => Right(())))
+      .use(_.verifyAndExtract(expiredToken))
       .map(res => expect.same(Left(InvalidAccessToken), res))
-  }
-
-  test("fails when claims extractor fails") { client =>
-    for {
-      token    <- getToken(client)
-      err       = new Exception("boom")
-      extractor = (_: JwtClaim) => Left(err)
-      res      <- OidcJwtVerifier.create(client, issuerUri).use(_.verifyAndExtract(token, extractor))
-    } yield expect.same(Left(InvalidJwtClaims(err)), res)
-  }
-
-  test("fails when claims can't be found") { client =>
-    for {
-      token    <- getToken(client)
-      extractor = (c: JwtClaim) => parse(c.content).flatMap(_.hcursor.get[String]("not_there"))
-      res      <- OidcJwtVerifier.create(client, issuerUri).use(_.verifyAndExtract(token, extractor))
-    } yield expect(res match {
-      case Left(InvalidJwtClaims(_)) => true
-      case _                         => false
-    })
   }
 }

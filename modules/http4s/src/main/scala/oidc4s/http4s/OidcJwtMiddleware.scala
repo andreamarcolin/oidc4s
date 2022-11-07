@@ -17,7 +17,7 @@
 package oidc4s.http4s
 
 import cats.MonadThrow
-import cats.data.{Kleisli, OptionT}
+import cats.data.{EitherT, Kleisli, OptionT}
 import cats.syntax.all._
 import org.http4s.Credentials.Token
 import org.http4s.dsl.Http4sDsl
@@ -50,7 +50,10 @@ object OidcJwtMiddleware {
             case Authorization(Token(AuthScheme.Bearer, token)) => token
           }
           .fold(AccessTokenNotFound.asLeft[U].leftWiden[Error].pure[F]) { token =>
-            oidcJwtVerifier.verifyAndExtract[U](token, claimExtractor).map(_.leftMap(_ => InvalidAccessToken))
+            EitherT(oidcJwtVerifier.verifyAndExtract(token))
+              .subflatMap(claimExtractor)
+              .leftMap[Error](_ => InvalidAccessToken)
+              .value
           }
       }
 

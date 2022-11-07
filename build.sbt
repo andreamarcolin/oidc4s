@@ -10,6 +10,7 @@ val jwtV        = "9.1.1"
 val jwkV        = "1.2.24"
 val weaverV     = "0.8.0"
 val slf4jV      = "2.0.3"
+val log4catsV   = "2.5.0"
 
 val cats         = "org.typelevel"                 %% "cats-core"           % catsV
 val catsEffect   = "org.typelevel"                 %% "cats-effect"         % catsEffectV
@@ -21,6 +22,8 @@ val http4sDsl    = "org.http4s"                    %% "http4s-dsl"          % ht
 val http4sServer = "org.http4s"                    %% "http4s-server"       % http4sV
 val http4sClient = "org.http4s"                    %% "http4s-ember-client" % http4sV
 val http4sCirce  = "org.http4s"                    %% "http4s-circe"        % http4sV
+val log4cats     = "org.typelevel"                 %% "log4cats-core"       % log4catsV
+val log4catsNoOp = "org.typelevel"                 %% "log4cats-noop"       % log4catsV
 val sttp         = "com.softwaremill.sttp.client3" %% "core"                % sttpV
 val sttpHttp4s   = "com.softwaremill.sttp.client3" %% "http4s-backend"      % sttpV
 val sttpCirce    = "com.softwaremill.sttp.client3" %% "circe"               % sttpV
@@ -98,11 +101,13 @@ lazy val core = project
       sttpCirce,
       jwtCirce,
       jwk,
+      log4cats,
       weaver       % Test,
       sttpHttp4s   % Test,
       http4sClient % Test,
       circeParser  % Test,
-      sl4fjNop     % Test
+      sl4fjNop     % Test,
+      log4catsNoOp % Test
     )
   )
 
