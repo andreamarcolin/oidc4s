@@ -128,6 +128,8 @@ lazy val http4s = project
       sttpHttp4s   % Test,
       http4sClient % Test,
       circeParser  % Test,
-      sl4fjNop     % Test
+      sl4fjNop     % Test,
+      // log4cats     % Test,
+      log4catsNoOp % Test
     )
   )

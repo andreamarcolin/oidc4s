@@ -8,7 +8,6 @@ import oidc4s.Error._
 import org.http4s.ember.client.EmberClientBuilder
 import org.typelevel.log4cats.noop.NoOpFactory
 import org.typelevel.log4cats.LoggerFactory
-import pdi.jwt.JwtClaim
 import sttp.client3._
 import sttp.client3.circe.asJson
 import sttp.client3.http4s.Http4sBackend
@@ -76,9 +75,15 @@ object OidcJwtVerifierSpec extends IOSuite {
 
   test("claims get extracted successfully") { client =>
     for {
-      token <- getToken(client)
-      res   <- OidcJwtVerifier.create(client, issuerUri).use(_.verifyAndExtract(token))
-    } yield expect.same(Right("org1" -> "user1"), res)
+      token  <- getToken(client)
+      res    <- OidcJwtVerifier.create(client, issuerUri).use(_.verifyAndExtract(token)).rethrow
+      content = parse(res.content).flatMap(j =>
+                  (
+                    j.hcursor.get[String]("http://localhost:8080/org_id"),
+                    j.hcursor.get[String]("http://localhost:8080/user_id")
+                  ).tupled
+                )
+    } yield expect.same(Right("org1" -> "user1"), content)
   }
 
   test("an expired token fails verification") { client =>
