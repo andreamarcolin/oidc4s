@@ -8,7 +8,7 @@ A [OpenID Connect](https://openid.net/specs/openid-connect-core-1_0-final.html) 
 and also providing first-class integration with [http4s](https://http4s.org/) through a custom middleware.
 
 This library is based on [cats](https://typelevel.org/cats/), [cats-effect](https://typelevel.org/cats-effect/), [sttp](https://sttp.softwaremill.com/), [circe](https://circe.github.io/circe/) and [jwt-scala](https://github.com/jwt-scala/jwt-scala). 
-First-class integration with [http4s](https://http4s.org/) is implemented in the dedicated `oidc4s-http4s` module via a http4s `AuthMiddleware`.
+First-class integration with [http4s](https://http4s.org/) is implemented by the dedicated `oidc4s-http4s` module via a http4s `AuthMiddleware`.
 
 Published both for Scala 3 and Scala 2.13.
 
@@ -24,7 +24,60 @@ libraryDependencies ++= Seq(
 )
 ```
 
-## Notes
+### Creating a verifier
+```scala
+import cats.effect._
+import cats.syntax.all._
+import oidc4s._
+import org.http4s.ember.client.EmberClientBuilder
+import sttp.client3._
+import sttp.client3.http4s.Http4sBackend
 
+for {
+  client   <- EmberClientBuilder.default[IO].build.map(Http4sBackend.usingClient(_))
+  verifier <- OidcJwtVerifier.create[IO](client, uri"http://localhost:8080/realms/test")
+} yield verifier
+```
+
+> **Note**
+> `OidcJwtVerifier.create` requires a log4cats `LoggerFactory` implicit instance (see [here](https://github.com/typelevel/log4cats#logging-using-capabilities) for details).  
+> If your project already depends on log4cats-slf4j, you can just add the following import:  
+> `import org.typelevel.log4cats.slf4j._`
+
+### Verifying tokens (and extracting custom claims)
+```scala
+import io.circe.parser.parse
+
+for {
+  claims <- verifier.verifyAndExtract(token)
+  content = parse(claims.content).flatMap(_.hcursor.get[String]("custom_claim"))
+} yield content
+```
+
+### Http4s integration
+```scala
+import cats.effect._
+import cats.syntax.all._
+import io.circe._
+import org.http4s.{Uri => _, _}
+import org.http4s.dsl.io._
+import org.http4s.server._
+import sttp.client3._
+
+val authedRoutes: AuthedRoutes[String, IO] =
+  AuthedRoutes.of[String, IO] {
+    case GET -> Root as userId => Ok(userId)
+  }
+
+val extractor: JwtClaim => Either[io.circe.Error, String] =
+  c => parse(c.content).flatMap(_.hcursor.get[String]("custom_claim"))
+
+val middleware: AuthMiddleware[IO, String] =
+  OidcJwtMiddleware(verifier, uri"http://localhost:8080/realms/test", extractor, _.toString)
+
+val routes: HttpRoutes[IO] = middleware(authedRoutes)
+```
+
+## Notes
 Note that oidc4s is pre-1.0 software and is still undergoing active development. New versions are not binary compatible with prior versions, although in most cases user code will be source compatible.
 See [here](https://www.scala-lang.org/blog/2021/02/16/preventing-version-conflicts-with-versionscheme.html#early-semver-and-sbt-version-policy) for more details about the adopted version policy

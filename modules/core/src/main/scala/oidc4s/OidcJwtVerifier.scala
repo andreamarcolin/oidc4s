@@ -76,6 +76,18 @@ object OidcJwtVerifier {
 
     }
 
+  /**
+   * Creates an 'OidcJwtVerifier' instance that uses the provided HTTP client to first fetch the IdP's configuration
+   * using OpenID Connect Discovery and then fetch the public keys (JWK) that allow JWTs to be verified.
+   * Also makes sure to keep the keys up to date by refreshing them when they expire (according to the max-age header
+   * set on the response by the IdP, and falling back to a - configurable - 1 minute interval if that isn't set).
+   *
+   * @param httpClient a sttp backend
+   * @param issuerUri the base URI of the IdP, that will get suffixed with "/.well-known/openid-configuration"
+   * @param fallbackJWKRefreshInterval the interval between refreshes of the keys cache if the IdP doesn't specify a max-age on the JWK endpoint
+   * @tparam F
+   * @return A 'OidcJwtVerifier' instance that can be used to verify JWTs
+   */
   def create[F[_]: Temporal: LoggerFactory](
       httpClient: SttpBackend[F, Any],
       issuerUri: Uri,
