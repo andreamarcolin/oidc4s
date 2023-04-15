@@ -8,7 +8,7 @@ val http4sV     = "0.23.18"
 val sttpV       = "3.8.15"
 val jwtV        = "9.2.0"
 val jwkV        = "1.2.24"
-val weaverV     = "0.8.2"
+val weaverV     = "0.8.3"
 val slf4jV      = "2.0.7"
 val log4catsV   = "2.5.0"
 
