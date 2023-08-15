@@ -1,7 +1,7 @@
 addCommandAlias("fmt", "all scalafmtSbt scalafmtAll; all scalafixAll; all headerCreate")
 addCommandAlias("fmtCheck", "all scalafmtSbtCheck scalafmtCheckAll; all scalafixAll --check; all headerCheck")
 
-val catsV       = "2.9.0"
+val catsV       = "2.10.0"
 val catsEffectV = "3.5.1"
 val circeV      = "0.14.5"
 val http4sV     = "0.23.23"
