@@ -9,7 +9,7 @@ val sttpV       = "3.9.1"
 val jwtV        = "9.4.5"
 val jwkV        = "1.2.24"
 val weaverV     = "0.8.3"
-val slf4jV      = "2.0.9"
+val slf4jV      = "2.0.12"
 val log4catsV   = "2.6.0"
 
 val cats         = "org.typelevel"                 %% "cats-core"           % catsV
