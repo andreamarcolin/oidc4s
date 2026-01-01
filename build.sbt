@@ -1,16 +1,16 @@
 addCommandAlias("fmt", "all scalafmtSbt scalafmtAll; all scalafixAll; all headerCreate")
 addCommandAlias("fmtCheck", "all scalafmtSbtCheck scalafmtCheckAll; all scalafixAll --check; all headerCheck")
 
-val catsV       = "2.10.0"
-val catsEffectV = "3.5.2"
-val circeV      = "0.14.6"
-val http4sV     = "0.23.24"
-val sttpV       = "3.9.1"
-val jwtV        = "9.4.5"
+val catsV       = "2.13.0"
+val catsEffectV = "3.6.3"
+val circeV      = "0.14.14"
+val http4sV     = "0.23.32"
+val sttpV       = "3.11.0"
+val jwtV        = "11.0.0"
 val jwkV        = "1.2.24"
-val weaverV     = "0.8.3"
-val slf4jV      = "2.0.9"
-val log4catsV   = "2.6.0"
+val weaverV     = "0.9.0"
+val slf4jV      = "2.0.17"
+val log4catsV   = "2.7.1"
 
 val cats         = "org.typelevel"                 %% "cats-core"           % catsV
 val catsEffect   = "org.typelevel"                 %% "cats-effect"         % catsEffectV
@@ -29,20 +29,16 @@ val sttpHttp4s   = "com.softwaremill.sttp.client3" %% "http4s-backend"      % st
 val sttpCirce    = "com.softwaremill.sttp.client3" %% "circe"               % sttpV
 val jwtCirce     = "com.github.jwt-scala"          %% "jwt-circe"           % jwtV
 val jwk          = "com.chatwork"                  %% "scala-jwk"           % jwkV
-val weaver       = "com.disneystreaming"           %% "weaver-cats"         % weaverV
+val weaver       = "org.typelevel"                 %% "weaver-cats"         % weaverV
 val sl4fjNop     = "org.slf4j"                      % "slf4j-nop"           % slf4jV
 
 inThisBuild(
   List(
     organization                           := "io.github.andreamarcolin",
     homepage                               := Some(url("https://github.com/andreamarcolin/oidc4s")),
-    ThisBuild / semanticdbEnabled          := true,
-    ThisBuild / semanticdbVersion          := scalafixSemanticdb.revision,
-    ThisBuild / scalafixDependencies       := List("com.github.liancheng" %% "organize-imports" % "0.6.0"),
-    ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
     ThisBuild / versionScheme              := Some("early-semver"),
-    sonatypeCredentialHost                 := "s01.oss.sonatype.org",
-    sonatypeRepository                     := "https://s01.oss.sonatype.org/service/local",
+    //sonatypeCredentialHost                 := "s01.oss.sonatype.org",
+    //sonatypeRepository                     := "https://s01.oss.sonatype.org/service/local",
     licenses                               := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
     developers                             := List(
       Developer(
@@ -55,8 +51,8 @@ inThisBuild(
   )
 )
 
-val scala213       = "2.13.12"
-val scala3         = "3.3.1"
+val scala213       = "2.13.18"
+val scala3         = "3.7.4"
 lazy val mainScala = scala213
 lazy val allScala  = Seq(scala213, scala3)
 
@@ -65,10 +61,7 @@ lazy val common = List(
   crossScalaVersions := allScala,
   organizationName   := "Andrea Marcolin",
   startYear          := Some(2022),
-  headerLicense      := Some(HeaderLicense.ALv2("2022", "Andrea Marcolin")),
-  tpolecatScalacOptions ~= {
-    _.filterNot(f => f == ScalacOptions.warnUnusedLocals || f == ScalacOptions.warnUnusedParams)
-  },
+  headerLicense      := Some(HeaderLicense.ALv2("2026", "Andrea Marcolin")),
   testFrameworks += new TestFramework("weaver.framework.CatsEffect")
 )
 
