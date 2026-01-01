@@ -20,6 +20,8 @@ jobs:
           distribution: temurin
           java-version: 17
           cache: sbt
+      - name: Install sbt
+        uses: sbt/setup-sbt@v1
       - name: Compile & Test
         run: sbt +it:test
   lint:
@@ -34,5 +36,7 @@ jobs:
           distribution: temurin
           java-version: 17
           cache: sbt
+      - name: Install sbt
+        uses: sbt/setup-sbt@v1
       - name: Check with Scalafmt/Scalafix
         run: sbt fmtCheck
