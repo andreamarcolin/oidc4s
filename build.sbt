@@ -34,13 +34,13 @@ val sl4fjNop     = "org.slf4j"                      % "slf4j-nop"           % sl
 
 inThisBuild(
   List(
-    organization                           := "io.github.andreamarcolin",
-    homepage                               := Some(url("https://github.com/andreamarcolin/oidc4s")),
-    ThisBuild / versionScheme              := Some("early-semver"),
-    //sonatypeCredentialHost                 := "s01.oss.sonatype.org",
-    //sonatypeRepository                     := "https://s01.oss.sonatype.org/service/local",
-    licenses                               := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-    developers                             := List(
+    organization                  := "io.github.andreamarcolin",
+    homepage                      := Some(url("https://github.com/andreamarcolin/oidc4s")),
+    ThisBuild / semanticdbEnabled := true,
+    ThisBuild / semanticdbVersion := scalafixSemanticdb.revision,
+    ThisBuild / versionScheme     := Some("early-semver"),
+    licenses                      := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    developers                    := List(
       Developer(
         "andreamarcolin",
         "Andrea Marcolin",
