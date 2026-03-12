@@ -10,7 +10,7 @@ val jwtV        = "11.0.0"
 val jwkV        = "1.2.24"
 val weaverV     = "0.9.0"
 val slf4jV      = "2.0.17"
-val log4catsV   = "2.7.1"
+val log4catsV   = "2.8.0"
 
 val cats         = "org.typelevel"                 %% "cats-core"           % catsV
 val catsEffect   = "org.typelevel"                 %% "cats-effect"         % catsEffectV
