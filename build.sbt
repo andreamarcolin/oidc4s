@@ -4,7 +4,7 @@ addCommandAlias("fmtCheck", "all scalafmtSbtCheck scalafmtCheckAll; all scalafix
 val catsV       = "2.13.0"
 val catsEffectV = "3.6.3"
 val circeV      = "0.14.14"
-val http4sV     = "0.23.32"
+val http4sV     = "0.23.36"
 val sttpV       = "3.11.0"
 val jwtV        = "11.0.0"
 val jwkV        = "1.2.24"
